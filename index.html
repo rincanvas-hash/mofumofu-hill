@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>もふもふの丘へ、ようこそ</title>
+<style>
+  :root{
+    --text-dark:#4a4038;
+    --cream:#faf6ec;
+    --card-bg:#fffaf4;
+    --accent:#e98a9c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+    color:var(--text-dark);
+    overflow-x:hidden;
+    background:#cbe6f5;
+  }
+
+  section{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    padding:8vh 6vw 22vh;
+    text-align:center;
+    perspective:1200px;
+  }
+  #hero{ padding-bottom:8vh;}
+
+  /* ---- background photo with parallax ---- */
+  .bg{
+    position:absolute;
+    inset:-12% 0;
+    background-size:cover;
+    background-position:center;
+    z-index:0;
+    will-change:transform;
+  }
+  #hero .bg{ background-image:url("assets/bg-entrance.jpg");}
+  #postoffice .bg{ background-image:url("assets/bg-postoffice.jpg");}
+  #tree .bg{ background-image:url("assets/bg-tree.jpg");}
+  #theater .bg{ background-image:url("assets/bg-theater.jpg");}
+  #bookstore .bg{ background-image:url("assets/bg-bookstore.jpg");}
+  #atelier .bg{ background-image:url("assets/bg-apri.jpg");}
+  #author .bg{ background-image:url("assets/bg-rinayaha.jpg");}
+
+  section::before,
+  section::after{
+    content:"";
+    position:absolute; left:0; width:100%; height:12vh;
+    z-index:1; pointer-events:none;
+  }
+  section::before{ top:0; background:linear-gradient(to bottom,rgba(255,252,245,0.85),transparent);}
+  section::after{ bottom:0; background:linear-gradient(to top,rgba(255,252,245,0.85),transparent);}
+
+  /* ---- floating light particles ---- */
+  .fx{ position:absolute; inset:0; z-index:2; pointer-events:none; overflow:hidden;}
+  .particle{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,250,225,0.9);
+    box-shadow:0 0 6px 2px rgba(255,250,225,0.6);
+    animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{ transform:translateY(0) translateX(0); opacity:0;}
+    10%{ opacity:0.9;}
+    90%{ opacity:0.7;}
+    100%{ transform:translateY(-110vh) translateX(24px); opacity:0;}
+  }
+
+  /* ---- mofu ---- */
+  .mofu{
+    position:relative;
+    width:min(180px,34vw);
+    z-index:4;
+    filter:drop-shadow(0 10px 8px rgba(0,0,0,0.22));
+  }
+  .mofu img{ width:100%; height:auto; display:block;}
+  .mofu.side{
+    position:absolute; bottom:5vh; z-index:4;
+    width:min(150px,26vw);
+  }
+  @media (min-width:900px){
+    .mofu.side{ z-index:6;}
+  }
+  .mofu.left{ left:6%;}
+  .mofu.right{ right:6%;}
+  .mofu.wide{ width:min(200px,36vw);}
+
+  /* pose animations */
+  .mofu.pose-front{ animation:bob 2.6s ease-in-out infinite;}
+  .mofu.pose-walk{ animation:walk 3.2s ease-in-out infinite;}
+  .mofu.pose-walk-right{ animation:walkRight 3.2s ease-in-out infinite;}
+  .mofu.pose-sit{ animation:bob 3.4s ease-in-out infinite;}
+  .mofu.pose-happy{ animation:hop 1.6s ease-in-out infinite;}
+  .mofu.pose-sleep{ animation:breathe 4s ease-in-out infinite; transform-origin:bottom center;}
+  @keyframes bob{
+    0%,100%{ transform:translateY(0);}
+    50%{ transform:translateY(-10px);}
+  }
+  @keyframes walk{
+    0%,100%{ transform:translate(0,0) rotate(0deg);}
+    25%{ transform:translate(-6px,-6px) rotate(-1.5deg);}
+    50%{ transform:translate(-12px,0) rotate(0deg);}
+    75%{ transform:translate(-6px,-6px) rotate(1.5deg);}
+  }
+  @keyframes walkRight{
+    0%,100%{ transform:translate(0,0) rotate(0deg);}
+    25%{ transform:translate(6px,-6px) rotate(1.5deg);}
+    50%{ transform:translate(12px,0) rotate(0deg);}
+    75%{ transform:translate(6px,-6px) rotate(-1.5deg);}
+  }
+  @keyframes hop{
+    0%,100%{ transform:translateY(0) rotate(0deg);}
+    40%{ transform:translateY(-22px) rotate(-3deg);}
+    60%{ transform:translateY(-18px) rotate(2deg);}
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1);}
+    50%{ transform:scale(1.025,1.04);}
+  }
+
+  /* speech bubble */
+  .bubble{
+    position:absolute; top:-3.2em; left:50%; transform:translateX(-50%);
+    background:rgba(255,252,245,0.95);
+    border-radius:999px;
+    padding:0.5em 1.1em;
+    font-size:0.8rem;
+    white-space:nowrap;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    z-index:6;
+  }
+  .bubble::after{
+    content:"";
+    position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+    border-width:7px 6px 0 6px;
+    border-style:solid;
+    border-color:rgba(255,252,245,0.95) transparent transparent transparent;
+  }
+  .mofu.pose-sleep .bubble{ top:12%;}
+  /* keep bubbles inside the screen on the sides */
+  .mofu.left .bubble{ left:0; transform:none;}
+  .mofu.left .bubble::after{ left:28px; transform:none;}
+  .mofu.right .bubble{ left:auto; right:0; transform:none;}
+  .mofu.right .bubble::after{ left:auto; right:28px; transform:none;}
+  /* hero: bubble sits to the right of mofu so it never covers the panel */
+  .mofu.hero .bubble{
+    top:12%; left:100%; transform:none; margin-left:0.6em;
+  }
+  .mofu.hero .bubble::after{
+    left:-6px; bottom:auto; top:50%; transform:translateY(-50%);
+    border-width:6px 7px 6px 0;
+    border-color:transparent rgba(255,252,245,0.95) transparent transparent;
+  }
+
+  /* ---- content panel (floating glass card) ---- */
+  .content-block{
+    position:relative; z-index:5;
+    max-width:34em;
+    background:linear-gradient(145deg,rgba(255,253,248,0.9) 0%,rgba(255,250,240,0.74) 100%);
+    backdrop-filter:blur(8px) saturate(1.1);
+    -webkit-backdrop-filter:blur(8px) saturate(1.1);
+    border-radius:24px;
+    padding:2em 2.2em;
+    border:1px solid rgba(255,255,255,0.75);
+    box-shadow:
+      0 1px 2px rgba(80,60,40,0.06),
+      0 8px 16px rgba(80,60,40,0.10),
+      0 26px 50px rgba(80,60,40,0.18),
+      0 60px 90px -20px rgba(80,60,40,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    transform:rotateX(2deg);
+    transform-style:preserve-3d;
+    animation:floatCard 6s ease-in-out infinite;
+    transition:transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  @keyframes floatCard{
+    0%,100%{ transform:rotateX(2deg) translateY(0);}
+    50%{ transform:rotateX(2deg) translateY(-6px);}
+  }
+  .content-block:hover{
+    animation-play-state:paused;
+    transform:rotateX(0deg) translateY(-10px) scale(1.01);
+    box-shadow:
+      0 2px 4px rgba(80,60,40,0.06),
+      0 14px 24px rgba(80,60,40,0.12),
+      0 36px 64px rgba(80,60,40,0.22),
+      0 80px 110px -20px rgba(80,60,40,0.26),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  /* soft ground shadow beneath the panel */
+  .content-block::after{
+    content:"";
+    position:absolute; left:10%; right:10%; bottom:-28px; height:36px;
+    background:radial-gradient(ellipse at center,rgba(60,45,30,0.28) 0%,rgba(60,45,30,0) 70%);
+    filter:blur(6px);
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  h1{ font-size:clamp(1.7rem,5vw,2.8rem); margin-bottom:0.6em;}
+  h2{ font-size:clamp(1.3rem,4vw,2rem); margin-bottom:0.4em;}
+  p.lead{ font-size:clamp(0.95rem,2.4vw,1.15rem); line-height:1.9; margin:0 auto 1.3em;}
+
+  .btn{
+    display:inline-block;
+    padding:0.85em 2.1em;
+    border-radius:999px;
+    background:var(--accent);
+    color:#fff;
+    text-decoration:none;
+    font-size:1rem;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(233,138,156,0.45);
+    transition:transform 0.2s ease;
+  }
+  .btn:hover{ transform:translateY(-3px);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--text-dark);
+    border:1.5px solid var(--text-dark);
+    box-shadow:none;
+  }
+
+  .scroll-cue{
+    position:absolute; bottom:4%; left:50%; transform:translateX(-50%);
+    font-size:0.85rem; color:#fff;
+    text-shadow:0 1px 6px rgba(0,0,0,0.4);
+    z-index:5;
+    animation:bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce{
+    0%,100%{ transform:translate(-50%,0);}
+    50%{ transform:translate(-50%,8px);}
+  }
+
+  /* ---- residents ---- */
+  .residents{
+    display:flex; gap:0.9em; justify-content:center; flex-wrap:wrap; margin:1.1em 0 1.3em;
+  }
+  .resident{
+    width:64px; height:64px; border-radius:50%;
+    background:#fff;
+    border:3px solid #fff;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+    overflow:hidden;
+    animation:bob 3s ease-in-out infinite;
+  }
+  .resident:nth-child(2n){ animation-delay:0.4s;}
+  .resident:nth-child(3n){ animation-delay:0.8s;}
+  .resident img{ width:100%; height:100%; object-fit:contain; padding:3px;}
+
+  /* ---- card modal ---- */
+  #cardOverlay{
+    position:fixed; inset:0; background:rgba(60,50,40,0.5);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity 0.25s ease;
+    z-index:50; padding:5vw;
+  }
+  #cardOverlay.open{ opacity:1; pointer-events:auto;}
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    border-radius:18px;
+    max-width:420px; width:100%;
+    max-height:85vh; overflow-y:auto;
+    padding:2em 1.8em;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+    transform:translateY(20px);
+    transition:transform 0.25s ease;
+  }
+  #cardOverlay.open .card{ transform:translateY(0);}
+  .card-image{
+    width:100%; aspect-ratio:4/3; border-radius:12px;
+    background:repeating-linear-gradient(45deg,#f1e8da,#f1e8da 10px,#e9dcc8 10px,#e9dcc8 20px);
+    display:flex; align-items:center; justify-content:center;
+    color:#a3927d; font-size:0.85rem; margin-bottom:1em;
+    overflow:hidden;
+  }
+  .card-image img{ width:100%; height:100%; object-fit:cover; display:block;}
+  .card h3{ margin-bottom:0.5em; font-size:1.3rem;}
+  .card p{ font-size:0.95rem; line-height:1.8; margin-bottom:1.2em; color:#6b5f52;}
+  .card-links{ display:flex; flex-direction:column; gap:0.6em;}
+  .card-close{
+    position:absolute; top:10px; right:14px;
+    background:none; border:none; font-size:1.5rem; color:#8a7d6e; cursor:pointer;
+  }
+
+  footer{
+    text-align:center; padding:3em 1em; background:#fbe9dd; font-size:0.85rem; color:#8a7d6e;
+  }
+
+  @media (max-width:600px){
+    .content-block{ padding:1.5em 1.3em;}
+    .mofu.side{ bottom:6vh;}
+    .resident{ width:52px; height:52px;}
+    .bubble{ font-size:0.72rem;}
+    .mofu.hero .bubble{ top:-2.6em; left:50%; transform:translateX(-50%); margin-left:0;}
+    .mofu.hero .bubble::after{
+      left:50%; right:auto; top:auto; bottom:-6px; transform:translateX(-50%);
+      border-width:7px 6px 0 6px;
+      border-color:rgba(255,252,245,0.95) transparent transparent transparent;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 丘の入口 ============ -->
+<section id="hero">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-hero"></div>
+
+  <div class="content-block">
+    <h1><span style="display:inline-block;">もふもふの丘へ、</span><span style="display:inline-block;">ようこそ</span></h1>
+    <p class="lead">草原の一本道を、モフと一緒に歩いてみませんか。</p>
+    <a href="#postoffice" class="btn">丘を歩く</a>
+  </div>
+
+  <div class="mofu hero pose-front" style="margin-top:9vh;">
+    <div class="bubble">こっちだよ</div>
+    <img src="assets/mofu.png" alt="モフ">
+  </div>
+
+  <div class="scroll-cue">↓ scroll</div>
+</section>
+
+<!-- ============ ① 郵便小屋 ============ -->
+<section id="postoffice">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-post"></div>
+
+  <div class="mofu side left pose-walk-right">
+    <div class="bubble">お手紙が届いてるよ</div>
+    <img src="assets/mofu-walk.png" alt="モフ" style="transform:scaleX(-1);">
+  </div>
+
+  <div class="content-block">
+    <h2>📮 郵便小屋</h2>
+    <p class="lead">もふもふの丘から、小さな言葉とお手紙を届けます。<br>「今日のモフ」・もふもふの丘通信。</p>
+    <button class="btn" onclick="openCard('postoffice')">近づいてみる</button>
+  </div>
+</section>
+
+<!-- ============ ② 大きな木 ============ -->
+<section id="tree">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-tree"></div>
+
+  <div class="mofu side right pose-sit">
+    <div class="bubble">みんなを紹介するね</div>
+    <img src="assets/mofu-sit.png" alt="モフ">
+  </div>
+
+  <div class="content-block">
+    <h2>🌳 大きな木</h2>
+    <p class="lead">もふもふの丘の住民たちと、noteの物語。</p>
+    <div class="residents">
+      <div class="resident"><img src="assets/3.png" alt="うさぎ"></div>
+      <div class="resident"><img src="assets/4.png" alt="ひつじ"></div>
+      <div class="resident"><img src="assets/5.png" alt="ハムスター"></div>
+      <div class="resident"><img src="assets/6.png" alt="ハリネズミ"></div>
+      <div class="resident"><img src="assets/7.png" alt="アヒル"></div>
+      <div class="resident"><img src="assets/8.png" alt="こじか"></div>
+      <div class="resident"><img src="assets/9.png" alt="青い鳥"></div>
+    </div>
+    <button class="btn" onclick="openCard('tree')">近づいてみる</button>
+  </div>
+</section>
+
+<!-- ============ ③ 映写小屋 ============ -->
+<section id="theater">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-theater"></div>
+
+  <div class="mofu side left pose-front">
+    <div class="bubble">上映がはじまるよ</div>
+    <img src="assets/mofu.png" alt="モフ">
+  </div>
+
+  <div class="content-block">
+    <h2>🎬 映写小屋</h2>
+    <p class="lead">「銀色の賢者」、AIが紡ぐ動画をYouTubeでお届けします。</p>
+    <button class="btn" onclick="openCard('theater')">近づいてみる</button>
+  </div>
+</section>
+
+<!-- ============ ④ 小さな書店 ============ -->
+<section id="bookstore">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-book"></div>
+
+  <div class="mofu side right pose-happy">
+    <div class="bubble">おすすめの本があるよ</div>
+    <img src="assets/mofu-happy.png" alt="モフ">
+  </div>
+
+  <div class="content-block">
+    <h2>📚 小さな書店</h2>
+    <p class="lead">もふもふの丘の作品をならべています。</p>
+    <button class="btn" onclick="openCard('bookstore')">近づいてみる</button>
+  </div>
+</section>
+
+<!-- ============ ⑤ モフの工房 ============ -->
+<section id="atelier">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-atelier"></div>
+
+  <div class="mofu side left pose-walk">
+    <div class="bubble">アプリを作ってるんだ</div>
+    <img src="assets/mofu-walk.png" alt="モフ">
+  </div>
+
+  <div class="content-block">
+    <h2>🔧 モフの工房</h2>
+    <p class="lead">丘のなかまたちが使うアプリを、こつこつ作っています。<br>App Store・Webでお使いいただけます。</p>
+    <button class="btn" onclick="openCard('atelier')">近づいてみる</button>
+  </div>
+</section>
+
+<!-- ============ ⑥ 旅の終わりの一軒家 ============ -->
+<section id="author">
+  <div class="bg" data-speed="0.25"></div>
+  <div class="fx" id="fx-author"></div>
+
+  <div class="mofu side right wide pose-sleep">
+    <div class="bubble">ここが最後の家だよ…すぅ</div>
+    <img src="assets/mofu-sleep.png" alt="モフ">
+  </div>
+
+  <div class="content-block">
+    <h2>🏡 旅の終わりの一軒家</h2>
+    <p class="lead">もふもふの丘をつくっている、作者の家です。<br>おいしいお茶を用意して、お待ちしています。</p>
+    <button class="btn" onclick="openCard('author')">近づいてみる</button>
+    <p style="margin-top:2em; font-size:0.85rem; color:#8a7d6e;">おわり。また丘に遊びに来てね。</p>
+  </div>
+</section>
+
+<footer>&copy; もふもふの丘</footer>
+
+<!-- ============ カードモーダル ============ -->
+<div id="cardOverlay">
+  <div class="card">
+    <button class="card-close" onclick="closeCard()">×</button>
+    <div class="card-image" id="cardImage"></div>
+    <h3 id="cardTitle"></h3>
+    <p id="cardText"></p>
+    <div class="card-links" id="cardLinks"></div>
+  </div>
+</div>
+
+<script>
+const cardData = {
+  postoffice:{
+    title:"郵便小屋",
+    text:"もふもふの丘から、小さな言葉とお手紙を届けます。",
+    thumb:"assets/thumb-post.jpg",
+    links:[["今日のモフを読む","https://mofumofunooka.substack.com/"]]
+  },
+  tree:{
+    title:"大きな木",
+    text:"丘の住民たちの物語を、noteで綴っています。",
+    thumb:"assets/thumb-tree.jpg",
+    links:[["noteの物語を読む","https://note.com/mofu_oka"]]
+  },
+  theater:{
+    title:"映写小屋",
+    text:"「銀色の賢者」、AIが紡ぐ動画をYouTubeで公開中。",
+    thumb:"assets/thumb-theater.jpg",
+    links:[["YouTubeへ","https://www.youtube.com/@%E3%83%AC%E3%82%A4%E3%83%B3%E3%83%9C%E3%83%BC%E3%83%A9%E3%82%A4%E3%83%B3"]]
+  },
+  bookstore:{
+    title:"小さな書店",
+    text:"モフの作品をお求めいただけます。",
+    thumb:"assets/thumb-book.jpg",
+    links:[["本を読んでみる","https://ayaharin.my.canva.site/mofumofu-book"]]
+  },
+  atelier:{
+    title:"モフの工房",
+    text:"丘のなかまたちのアプリを作っています。App StoreとWebで公開中。",
+    thumb:"assets/thumb-apri.jpg",
+    links:[["アプリのまとめページへ","https://ayaharin.my.canva.site/mofu-app"]]
+  },
+  author:{
+    title:"旅の終わりの一軒家",
+    text:"もふもふの丘の作者、彩葉りんです。ホームページはこちらから。",
+    thumb:"assets/thumb-author.jpg",
+    links:[["作者のホームページへ","https://ayaharin.studio.site/"]]
+  }
+};
+
+function openCard(key){
+  const data = cardData[key];
+  document.getElementById("cardTitle").textContent = data.title;
+  document.getElementById("cardText").textContent = data.text;
+  const imgEl = document.getElementById("cardImage");
+  imgEl.innerHTML = data.thumb ? `<img src="${data.thumb}" alt="${data.title}">` : "";
+  const linksEl = document.getElementById("cardLinks");
+  linksEl.innerHTML = "";
+  data.links.forEach(([label,url])=>{
+    const a = document.createElement("a");
+    a.href = url; a.textContent = label; a.className = "btn secondary";
+    a.target = "_blank"; a.rel = "noopener";
+    linksEl.appendChild(a);
+  });
+  document.getElementById("cardOverlay").classList.add("open");
+}
+function closeCard(){
+  document.getElementById("cardOverlay").classList.remove("open");
+}
+document.getElementById("cardOverlay").addEventListener("click",(e)=>{
+  if(e.target.id === "cardOverlay") closeCard();
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key === "Escape") closeCard();
+});
+
+// ---- floating light particles ----
+function spawnParticles(containerId, count){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  for(let i=0;i<count;i++){
+    const p = document.createElement("div");
+    p.className = "particle";
+    const size = 3 + Math.random()*4;
+    p.style.width = size+"px";
+    p.style.height = size+"px";
+    p.style.left = (Math.random()*100)+"%";
+    p.style.bottom = "-10px";
+    p.style.animationDuration = (7 + Math.random()*7)+"s";
+    p.style.animationDelay = (Math.random()*7)+"s";
+    el.appendChild(p);
+  }
+}
+const particleCount = window.innerWidth < 600 ? 6 : 12;
+["fx-hero","fx-post","fx-tree","fx-theater","fx-book","fx-atelier","fx-author"]
+  .forEach(id => spawnParticles(id, particleCount));
+
+// ---- scroll parallax ----
+let ticking = false;
+function updateParallax(){
+  const vh = window.innerHeight;
+  document.querySelectorAll("section").forEach(sec=>{
+    const bg = sec.querySelector(".bg");
+    if(!bg) return;
+    const rect = sec.getBoundingClientRect();
+    if(rect.bottom < 0 || rect.top > vh) return;
+    const progress = (rect.top + rect.height/2 - vh/2) / vh;
+    const speed = parseFloat(bg.dataset.speed || 0.25);
+    bg.style.transform = `translateY(${progress * speed * 100}px)`;
+  });
+  ticking = false;
+}
+window.addEventListener("scroll", ()=>{
+  if(!ticking){
+    requestAnimationFrame(updateParallax);
+    ticking = true;
+  }
+});
+updateParallax();
+</script>
+
+</body>
+</html>
